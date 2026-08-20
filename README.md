@@ -51,36 +51,41 @@ sudo systemctl status inventaire-dnd
 
 ## 3. Exposer via nginx + HTTPS
 
-Reverse proxy nginx (`/etc/nginx/sites-available/inventaire-dnd`) :
+L'application n'a **aucun compte ni mot de passe** : quiconque connaît
+l'URL peut lire/modifier/supprimer tout le contenu. Dès que le serveur
+quitte votre machine locale, une authentification est donc **obligatoire**,
+pas optionnelle.
 
-```nginx
-server {
-    listen 80;
-    server_name inventaire.mondomaine.fr;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
+Utilisez la config fournie dans [`deploy/nginx-inventaire-dnd.conf`](deploy/nginx-inventaire-dnd.conf),
+qui active `auth_basic` par défaut :
 
 ```bash
+# 1. créer le fichier de mots de passe (un compte par joueur/table)
+sudo apt install apache2-utils
+sudo htpasswd -c /etc/nginx/.htpasswd-inventaire-dnd ma_table
+
+# 2. copier la config
+sudo cp deploy/nginx-inventaire-dnd.conf /etc/nginx/sites-available/inventaire-dnd
 sudo ln -s /etc/nginx/sites-available/inventaire-dnd /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 
-# certificat HTTPS gratuit
+# 3. certificat HTTPS gratuit (ajoute aussi la redirection HTTP -> HTTPS)
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d inventaire.mondomaine.fr
 ```
 
 ## 4. Sécurité et bon sens
 
-- N'importe qui connaissant l'URL peut lire/modifier tous les inventaires
-  (pas de compte ni de mot de passe). Pour une table privée, c'est
-  généralement suffisant, mais vous pouvez restreindre l'accès avec une
-  authentification HTTP basique dans nginx si besoin (`auth_basic`).
+- **Authentification obligatoire** dès que le serveur est accessible depuis
+  Internet : voir l'étape 3 ci-dessus (`auth_basic`). Sans ça, n'importe qui
+  trouvant l'URL a un accès complet en lecture/écriture/suppression sur
+  toutes les données, y compris celles des autres joueurs.
+- Le serveur applique déjà côté Node (`server.js`) : des en-têtes de
+  sécurité (CSP, `X-Frame-Options`, etc. via `helmet`), une limite de débit
+  sur l'API (`express-rate-limit`), et une validation stricte des clés et
+  tailles de valeurs stockées. Le front-end échappe systématiquement les
+  données utilisateur (noms de personnages/objets, icônes) avant de les
+  insérer dans la page, pour éviter les injections HTML/JS.
 - Pare-feu : n'ouvrez que les ports 80/443 (`ufw allow 80,443/tcp`),
   gardez le port 3000 fermé au monde extérieur (nginx s'en charge en local).
 - Sauvegardez régulièrement `data.json` (c'est tout l'état de l'appli).
@@ -93,3 +98,5 @@ sudo certbot --nginx -d inventaire.mondomaine.fr
   cette API à la place)
 - `data.json` — créé automatiquement au premier lancement, contient
   toutes les données
+- `deploy/nginx-inventaire-dnd.conf` — config nginx prête à l'emploi avec
+  authentification `auth_basic` obligatoire
