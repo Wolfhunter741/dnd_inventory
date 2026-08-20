@@ -618,7 +618,7 @@ function openModal(html, onMount){
 }
 function closeModal(){ modalOpen = false; el('modalRoot').innerHTML=''; }
 
-const AUTO_BASE_COLS = 5;
+const AUTO_BASE_COLS = 7;
 const AUTO_BASE_ROWS = 7;
 function calcAutoRows(force, backpack, large){
   let rows = AUTO_BASE_ROWS + (force - 10) + (backpack ? 2 : 0) + (large ? 2 : 0);
