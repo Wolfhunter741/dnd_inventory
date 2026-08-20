@@ -348,6 +348,7 @@ async function storageDelete(key){
 }
 
 function cellPx(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); }
+function currentChar(){ return characters.find(c=>c.id===currentCharId); }
 
 function fits(list, x, y, w, h, gw, gh, excludeId){
   if(x<0||y<0||x+w>gw||y+h>gh) return false;
