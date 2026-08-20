@@ -138,17 +138,19 @@
     user-select:none;
   }
   .item{
-    position:absolute; border-radius:6px; display:flex; flex-direction:column; align-items:center;
-    justify-content:center; cursor:grab; color:#fff8ea; text-shadow:0 1px 1px rgba(0,0,0,0.5);
+    position:absolute; border-radius:6px; display:flex; flex-direction:column; align-items:stretch;
+    cursor:grab; color:#fff8ea; text-shadow:0 1px 1px rgba(0,0,0,0.5);
     border:1px solid rgba(0,0,0,0.35); box-shadow:0 2px 5px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
     transition:box-shadow 0.15s ease;
     font-size:11px; line-height:1.15; padding:2px; text-align:center; overflow:hidden;
   }
+  .item .icon-wrap{ flex:1; min-height:0; min-width:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .item .icon-wrap img{ display:block; }
   .item.selected{ box-shadow:0 0 0 2px var(--brass-light), 0 2px 6px rgba(0,0,0,0.4); z-index:5; }
   .item.invalid{ box-shadow:0 0 0 2px var(--danger-light); }
   .item.dragging{ cursor:grabbing; opacity:0.92; z-index:10; }
   .item .ic{ font-size:16px; }
-  .item .nm{ font-size:9.5px; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .item .nm{ flex:0 0 auto; font-size:9.5px; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .item-actions{ position:absolute; display:flex; gap:4px; z-index:20; }
   .item-actions button{
     width:22px; height:22px; border-radius:50%; border:1px solid var(--leather-edge);
@@ -257,30 +259,30 @@ const CATS = {
 };
 
 const TEMPLATES = [
-  {name:'Bourse', w:1,h:1, cat:'treasure', icon:'icons/Bourse.png', iconScale:1.6},
-  {name:'Potion', w:1,h:2, cat:'potion', icon:'🧪'},
-  {name:'Anneau', w:1,h:1, cat:'treasure', icon:'💍'},
-  {name:'Collier', w:2,h:1, cat:'treasure', icon:'📿'},
-  {name:'Bracelet', w:2,h:1, cat:'treasure', icon:'🔗'},
-  {name:'Amulette', w:1,h:2, cat:'treasure', icon:'🧿'},
-  {name:'Bougies', w:1,h:1, cat:'misc', icon:'🕯️'},
-  {name:'Livre', w:1,h:2, cat:'misc', icon:'📖'},
-  {name:'Lettre / parchemin', w:2,h:1, cat:'misc', icon:'📜'},
-  {name:'Carte', w:1,h:4, cat:'misc', icon:'🗺️'},
-  {name:'Corde', w:2,h:2, cat:'misc', icon:'🪢'},
-  {name:'Petite boîte', w:2,h:1, cat:'container', icon:'📦'},
-  {name:'Moyenne boîte', w:2,h:2, cat:'container', icon:'🗃️'},
-  {name:'Grosse boîte', w:4,h:3, cat:'container', icon:'🧰'},
-  {name:'Coffre', w:4,h:5, cat:'container', icon:'🧳'},
-  {name:'Petite arme', w:1,h:2, cat:'weapon', icon:'🗡️'},
-  {name:'Arme à une main', w:1,h:3, cat:'weapon', icon:'⚔️'},
-  {name:'Arme à deux mains', w:2,h:3, cat:'weapon', icon:'🔨'},
-  {name:'Bâton / javelot', w:1,h:6, cat:'weapon', icon:'🔱'},
-  {name:'Arc / arbalète', w:2,h:3, cat:'weapon', icon:'🏹'},
-  {name:'Carquois', w:1,h:3, cat:'weapon', icon:'🎯'},
-  {name:'Instrument', w:2,h:3, cat:'misc', icon:'🎻'},
-  {name:'Bouclier', w:3,h:3, cat:'armor', icon:'🛡️'},
-  {name:'Sac de couchage', w:2,h:3, cat:'misc', icon:'🛏️'}
+  {name:'Bourse', w:1,h:1, cat:'treasure', icon:'icons/Bourse.png', iconScale:1.0},
+  {name:'Potion', w:1,h:2, cat:'potion', icon:'icons/Potion.png', iconScale:1.0},
+  {name:'Anneau', w:1,h:1, cat:'treasure', icon:'icons/Anneau.png', iconScale:1.0},
+  {name:'Collier', w:2,h:1, cat:'treasure', icon:'icons/Collier.png', iconScale:1.0},
+  {name:'Bracelet', w:2,h:1, cat:'treasure', icon:'icons/Bracelet.png', iconScale:1.0},
+  {name:'Amulette', w:1,h:2, cat:'treasure', icon:'icons/Amulette.png', iconScale:1.0},
+  {name:'Bougies', w:1,h:1, cat:'misc', icon:'icons/Bougie.png', iconScale:1.0},
+  {name:'Livre', w:2,h:2, cat:'misc', icon:'icons/Livre.png', iconScale:1.0},
+  {name:'Lettre / parchemin', w:2,h:1, cat:'misc', icon:'icons/Parchemin.png', iconScale:1.0},
+  {name:'Carte', w:1,h:4, cat:'misc', icon:'icons/Carte.png', iconScale:1.0},
+  {name:'Corde', w:2,h:2, cat:'misc', icon:'icons/Corde.png', iconScale:1.0},
+  {name:'Petite boîte', w:2,h:1, cat:'container', icon:'icons/Petite boite.png', iconScale:1.0},
+  {name:'Moyenne boîte', w:2,h:2, cat:'container', icon:'icons/Moyenne boite.png', iconScale:1.0},
+  {name:'Grosse boîte', w:4,h:3, cat:'container', icon:'icons/Grosse boite.png', iconScale:1.0},
+  {name:'Coffre', w:4,h:5, cat:'container', icon:'icons/Coffre.png', iconScale:1.0},
+  {name:'Petite arme', w:1,h:2, cat:'weapon', icon:'icons/Petite arme.png', iconScale:1.0},
+  {name:'Arme à une main', w:1,h:3, cat:'weapon', icon:'icons/Arme à une main.png', iconScale:1.0},
+  {name:'Arme à deux mains', w:2,h:3, cat:'weapon', icon:'icons/Arme à deux mains.png', iconScale:1.0},
+  {name:'Bâton / javelot', w:1,h:6, cat:'weapon', icon:'icons/Baton.png', iconScale:1.0},
+  {name:'Arc / arbalète', w:2,h:3, cat:'weapon', icon:'icons/Arc.png', iconScale:1.0},
+  {name:'Carquois', w:1,h:3, cat:'weapon', icon:'icons/Carquois.png', iconScale:1.0},
+  {name:'Instrument', w:2,h:3, cat:'misc', icon:'icons/Instrument.png', iconScale:1.0},
+  {name:'Bouclier', w:3,h:3, cat:'armor', icon:'icons/Bouclier.png', iconScale:1.0},
+  {name:'Sac de couchage', w:2,h:3, cat:'misc', icon:'icons/Sac de couchage.png', iconScale:1.0}
 ];
 
 let characters = [];
@@ -348,7 +350,6 @@ async function storageDelete(key){
 }
 
 function cellPx(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); }
-function currentChar(){ return characters.find(c=>c.id===currentCharId); }
 
 function fits(list, x, y, w, h, gw, gh, excludeId){
   if(x<0||y<0||x+w>gw||y+h>gh) return false;
@@ -382,6 +383,7 @@ function iconHTML(icon, size, scale){
   }
   return '<span class="ic" style="font-size:'+finalSize+'px;">'+(icon||'?')+'</span>';
 }
+function currentChar(){ return characters.find(c=>c.id===currentCharId); }
 
 async function init(){
   characters = (await storageGet(K_CHARS)) || [];
@@ -499,13 +501,32 @@ function renderItem(it, cell, c){
   const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 4;
   const d = document.createElement('div');
   d.className = 'item' + (it.id===selectedId ? ' selected' : '');
+  const boxW = it.w*cell - gap;
+  const boxH = it.h*cell - gap;
   d.style.left = (it.x*cell + gap/2) + 'px';
   d.style.top = (it.y*cell + gap/2) + 'px';
-  d.style.width = (it.w*cell - gap) + 'px';
-  d.style.height = (it.h*cell - gap) + 'px';
+  d.style.width = boxW + 'px';
+  d.style.height = boxH + 'px';
   d.style.background = CATS[it.cat] ? CATS[it.cat].color : 'var(--cat-misc)';
   d.dataset.id = it.id;
-  d.innerHTML = iconHTML(it.icon||it.name[0], 20, it.iconScale) + (it.w>1||it.h>1 ? '<span class="nm">'+it.name+'</span>' : '');
+
+  const showName = it.w>1 || it.h>1;
+  const nameH = showName ? Math.max(11, Math.round(cell*0.24)) : 0;
+  const pad = 6;
+  const availW = Math.max(8, boxW - pad);
+  const availH = Math.max(8, boxH - nameH - pad);
+  const scale = it.iconScale || 1;
+
+  let iconHtml;
+  if(isImagePath(it.icon)){
+    const pct = Math.round(100*scale);
+    iconHtml = '<img class="ic-img" src="'+it.icon.trim().replace(/"/g,'&quot;')+'" alt="" style="width:'+pct+'%;height:'+pct+'%;object-fit:contain;">';
+  } else {
+    const emojiSize = Math.round(Math.min(availW, availH) * scale);
+    iconHtml = '<span class="ic" style="font-size:'+emojiSize+'px;">'+(it.icon||it.name[0]||'?')+'</span>';
+  }
+
+  d.innerHTML = '<div class="icon-wrap">'+iconHtml+'</div>' + (showName ? '<span class="nm">'+escapeHtml(it.name)+'</span>' : '');
   attachDrag(d, it, c);
   return d;
 }
@@ -620,8 +641,8 @@ function openCharModal(existingChar){
   const manH = isEdit ? existingChar.height : AUTO_BASE_ROWS;
 
   openModal(
-    '<h3>'+(isEdit ? 'Modifier '+escapeHtml(existingChar.name) : 'Nouvel aventurier')+'</h3>'+
-    '<div class="field"><label>Nom</label><input id="mName" placeholder="Ex. Elandra" value="'+(isEdit?escapeHtml(existingChar.name):'')+'"></div>'+
+    '<h3>'+(isEdit ? 'Modifier '+existingChar.name : 'Nouvel aventurier')+'</h3>'+
+    '<div class="field"><label>Nom</label><input id="mName" placeholder="Ex. Elandra" value="'+(isEdit?existingChar.name:'')+'"></div>'+
     '<div class="mode-toggle">'+
       '<button type="button" class="mode-btn" id="modeAuto">Automatique</button>'+
       '<button type="button" class="mode-btn" id="modeManual">Manuel</button>'+
@@ -763,7 +784,7 @@ function openEditItemModal(it){
       '<div class="field"><label>Hauteur (cases)</label><input id="eH" type="number" min="1" max="6" value="'+it.h+'"></div>'+
     '</div>'+
     '<div class="field"><label>Catégorie</label><select id="eCat">'+catOptions+'</select></div>'+
-    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+escapeHtml(it.icon||'')+'" maxlength="2"></div>'+
+    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+(it.icon||'')+'" maxlength="2"></div>'+
     '<div class="modal-actions"><button class="btn-secondary" id="eCancel">Annuler</button><button class="btn-primary" id="eOk">Enregistrer</button></div>',
     (root)=>{
       root.querySelector('#eCancel').addEventListener('click', closeModal);
