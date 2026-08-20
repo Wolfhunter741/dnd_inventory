@@ -294,6 +294,15 @@ let modalOpen = false;
 const el = id => document.getElementById(id);
 const uid = () => Math.random().toString(36).slice(2,10);
 
+// Échappe une valeur pour une insertion sûre dans du HTML (texte ou attribut).
+// Toute donnée fournie par un utilisateur (nom de perso, nom d'objet, icône...)
+// doit passer par cette fonction avant d'être injectée via innerHTML/template string.
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
 function toast(msg){
   const t = el('toast');
   t.textContent = msg;
@@ -367,9 +376,9 @@ function isImagePath(icon){
 }
 function iconHTML(icon, size){
   if(isImagePath(icon)){
-    return '<img class="ic-img" src="'+icon.trim().replace(/"/g,'&quot;')+'" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:contain;">';
+    return '<img class="ic-img" src="'+escapeHtml(icon.trim())+'" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:contain;">';
   }
-  return '<span class="ic">'+(icon||'?')+'</span>';
+  return '<span class="ic">'+escapeHtml(icon||'?')+'</span>';
 }
 function currentChar(){ return characters.find(c=>c.id===currentCharId); }
 
@@ -404,7 +413,7 @@ function renderTabs(){
   characters.forEach(c=>{
     const b = document.createElement('div');
     b.className = 'tab' + (c.id===currentCharId ? ' active' : '');
-    b.innerHTML = c.name + '<span class="edit" data-id="'+c.id+'">✎</span><span class="close" data-id="'+c.id+'">✕</span>';
+    b.innerHTML = escapeHtml(c.name) + '<span class="edit" data-id="'+c.id+'">✎</span><span class="close" data-id="'+c.id+'">✕</span>';
     b.addEventListener('click', (e)=>{
       if(e.target.classList.contains('close') || e.target.classList.contains('edit')) return;
       if(currentCharId !== c.id){ currentCharId = c.id; renderTabs(); loadCurrentItems(); }
@@ -439,7 +448,7 @@ function renderTemplates(){
   TEMPLATES.forEach(t=>{
     const d = document.createElement('div');
     d.className = 'tpl';
-    d.innerHTML = iconHTML(t.icon, 18)+'<span>'+t.name+'</span><span class="sz">'+t.w+'×'+t.h+'</span>';
+    d.innerHTML = iconHTML(t.icon, 18)+'<span>'+escapeHtml(t.name)+'</span><span class="sz">'+t.w+'×'+t.h+'</span>';
     d.addEventListener('click', ()=> placeTemplate(t));
     wrap.appendChild(d);
   });
@@ -495,7 +504,7 @@ function renderItem(it, cell, c){
   d.style.height = (it.h*cell - gap) + 'px';
   d.style.background = CATS[it.cat] ? CATS[it.cat].color : 'var(--cat-misc)';
   d.dataset.id = it.id;
-  d.innerHTML = iconHTML(it.icon||it.name[0], 20) + (it.w>1||it.h>1 ? '<span class="nm">'+it.name+'</span>' : '');
+  d.innerHTML = iconHTML(it.icon||it.name[0], 20) + (it.w>1||it.h>1 ? '<span class="nm">'+escapeHtml(it.name)+'</span>' : '');
   attachDrag(d, it, c);
   return d;
 }
@@ -610,8 +619,8 @@ function openCharModal(existingChar){
   const manH = isEdit ? existingChar.height : AUTO_BASE_ROWS;
 
   openModal(
-    '<h3>'+(isEdit ? 'Modifier '+existingChar.name : 'Nouvel aventurier')+'</h3>'+
-    '<div class="field"><label>Nom</label><input id="mName" placeholder="Ex. Elandra" value="'+(isEdit?existingChar.name:'')+'"></div>'+
+    '<h3>'+(isEdit ? 'Modifier '+escapeHtml(existingChar.name) : 'Nouvel aventurier')+'</h3>'+
+    '<div class="field"><label>Nom</label><input id="mName" placeholder="Ex. Elandra" value="'+(isEdit?escapeHtml(existingChar.name):'')+'"></div>'+
     '<div class="mode-toggle">'+
       '<button type="button" class="mode-btn" id="modeAuto">Automatique</button>'+
       '<button type="button" class="mode-btn" id="modeManual">Manuel</button>'+
@@ -747,13 +756,13 @@ function openEditItemModal(it){
   const catOptions = Object.entries(CATS).map(([k,v])=>'<option value="'+k+'" '+(k===it.cat?'selected':'')+'>'+v.label+'</option>').join('');
   openModal(
     '<h3>Modifier l\u2019objet</h3>'+
-    '<div class="field"><label>Nom</label><input id="eName" value="'+it.name.replace(/"/g,'&quot;')+'"></div>'+
+    '<div class="field"><label>Nom</label><input id="eName" value="'+escapeHtml(it.name)+'"></div>'+
     '<div class="field-row">'+
       '<div class="field"><label>Largeur (cases)</label><input id="eW" type="number" min="1" max="6" value="'+it.w+'"></div>'+
       '<div class="field"><label>Hauteur (cases)</label><input id="eH" type="number" min="1" max="6" value="'+it.h+'"></div>'+
     '</div>'+
     '<div class="field"><label>Catégorie</label><select id="eCat">'+catOptions+'</select></div>'+
-    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+(it.icon||'')+'" maxlength="2"></div>'+
+    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+escapeHtml(it.icon||'')+'" maxlength="2"></div>'+
     '<div class="modal-actions"><button class="btn-secondary" id="eCancel">Annuler</button><button class="btn-primary" id="eOk">Enregistrer</button></div>',
     (root)=>{
       root.querySelector('#eCancel').addEventListener('click', closeModal);
