@@ -374,13 +374,13 @@ function isImagePath(icon){
   if(s.includes('/')) return true;
   return false;
 }
-function iconHTML(icon, size){
+function iconHTML(icon, size, scale){
+  const finalSize = Math.round(size * (scale || 1));
   if(isImagePath(icon)){
-    return '<img class="ic-img" src="'+escapeHtml(icon.trim())+'" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:contain;">';
+    return '<img class="ic-img" src="'+icon.trim().replace(/"/g,'&quot;')+'" alt="" style="width:'+finalSize+'px;height:'+finalSize+'px;object-fit:contain;">';
   }
-  return '<span class="ic">'+escapeHtml(icon||'?')+'</span>';
+  return '<span class="ic" style="font-size:'+finalSize+'px;">'+(icon||'?')+'</span>';
 }
-function currentChar(){ return characters.find(c=>c.id===currentCharId); }
 
 async function init(){
   characters = (await storageGet(K_CHARS)) || [];
@@ -448,7 +448,7 @@ function renderTemplates(){
   TEMPLATES.forEach(t=>{
     const d = document.createElement('div');
     d.className = 'tpl';
-    d.innerHTML = iconHTML(t.icon, 18)+'<span>'+escapeHtml(t.name)+'</span><span class="sz">'+t.w+'×'+t.h+'</span>';
+    d.innerHTML = iconHTML(t.icon, 18, t.iconScale)+'<span>'+t.name+'</span><span class="sz">'+t.w+'×'+t.h+'</span>';
     d.addEventListener('click', ()=> placeTemplate(t));
     wrap.appendChild(d);
   });
@@ -459,7 +459,7 @@ async function placeTemplate(t){
   const c = currentChar();
   const pos = autoPlace(items, t.w, t.h, c.width, c.height);
   if(!pos){ toast('Le sac est plein — pas de place pour '+t.name); return; }
-  items.push({id:uid(), name:t.name, w:t.w, h:t.h, x:pos.x, y:pos.y, cat:t.cat, icon:t.icon});
+  items.push({id:uid(), name:t.name, w:t.w, h:t.h, x:pos.x, y:pos.y, cat:t.cat, icon:t.icon, iconScale:t.iconScale});
   renderGrid(); renderCapacity();
   await storageSet(K_ITEMS(currentCharId), items);
 }
@@ -504,7 +504,7 @@ function renderItem(it, cell, c){
   d.style.height = (it.h*cell - gap) + 'px';
   d.style.background = CATS[it.cat] ? CATS[it.cat].color : 'var(--cat-misc)';
   d.dataset.id = it.id;
-  d.innerHTML = iconHTML(it.icon||it.name[0], 20) + (it.w>1||it.h>1 ? '<span class="nm">'+escapeHtml(it.name)+'</span>' : '');
+  d.innerHTML = iconHTML(it.icon||it.name[0], 20, it.iconScale) + (it.w>1||it.h>1 ? '<span class="nm">'+it.name+'</span>' : '');
   attachDrag(d, it, c);
   return d;
 }
