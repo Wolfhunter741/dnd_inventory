@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Sac d'aventurier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#140f0c;
+    --bg-vignette: radial-gradient(circle at 50% -20%, #2a2019 0%, #140f0c 65%);
+    --leather:#5c3a22;
+    --leather-dark:#3a2313;
+    --leather-edge:#2a1a0d;
+    --stitch: rgba(221,210,171,0.28);
+    --parchment:#ddd2ab;
+    --parchment-dim:#a89d7c;
+    --ink:#2b3a55;
+    --ink-light:#5c7099;
+    --brass:#b08d57;
+    --brass-light:#e0bd7e;
+    --danger:#9a3f3f;
+    --danger-light:#d67a7a;
+    --ok:#5f8a5f;
+    --cell:48px;
+    --gap:4px;
+    --radius:7px;
+    --cat-weapon:#8b3a3a;
+    --cat-armor:#3b5169;
+    --cat-potion:#3b7a57;
+    --cat-misc:#7a6a4f;
+    --cat-treasure:#9c7a3e;
+    --cat-container:#5b4636;
+  }
+  @media (max-width:680px){ :root{ --cell:38px; } }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:var(--bg-deep) var(--bg-vignette);
+    font-family:'Spectral',serif;
+    color:var(--parchment);
+    padding:18px 14px 40px;
+  }
+  h1,h2,h3,.display{ font-family:'Cinzel',serif; letter-spacing:0.02em; }
+  .app{ max-width:1100px; margin:0 auto; }
+  header{ text-align:center; margin-bottom:16px; }
+  header h1{ font-size:26px; color:var(--brass-light); margin:0 0 4px; text-shadow:0 1px 0 #000; }
+  header p{ margin:0; font-size:13px; color:var(--parchment-dim); }
+  .badge-shared{
+    display:inline-flex; align-items:center; gap:6px; margin-top:8px;
+    font-size:11px; color:var(--parchment-dim); background:rgba(176,141,87,0.12);
+    border:1px solid rgba(176,141,87,0.35); padding:3px 10px; border-radius:20px;
+  }
+  .badge-shared::before{ content:"⟡"; color:var(--brass-light); }
+
+  .tabbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; margin-bottom:18px; }
+  .tab{
+    position:relative; font-family:'Cinzel',serif; font-size:13px; padding:8px 46px 8px 16px;
+    background:linear-gradient(180deg,var(--leather),var(--leather-dark));
+    border:1px solid var(--leather-edge); border-radius:5px 5px 2px 2px; color:var(--parchment-dim);
+    cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tab.active{ color:var(--brass-light); border-color:var(--brass); box-shadow:0 0 0 1px var(--brass) inset, inset 0 1px 0 rgba(255,255,255,0.1); }
+  .tab .edit{ position:absolute; right:24px; top:50%; transform:translateY(-50%); font-size:11px; opacity:0.5; }
+  .tab .edit:hover{ opacity:1; color:var(--brass-light); }
+  .tab .close{ position:absolute; right:6px; top:50%; transform:translateY(-50%); font-size:11px; opacity:0.5; }
+  .tab .close:hover{ opacity:1; color:var(--danger-light); }
+  .tab-add{
+    font-family:'Cinzel',serif; font-size:13px; padding:8px 14px; border-radius:5px;
+    background:transparent; border:1px dashed var(--brass); color:var(--brass-light); cursor:pointer;
+  }
+  .tab-add:hover{ background:rgba(176,141,87,0.12); }
+
+  .main{ display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+
+  .palette{
+    width:230px; flex-shrink:0;
+    background:linear-gradient(180deg,#2c2117,#1c150d);
+    border:1px solid var(--leather-edge); border-radius:10px; padding:12px;
+  }
+  .palette h3{ font-size:13px; color:var(--brass-light); margin:0 0 8px; text-align:center; }
+  .templates{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; max-height:400px; overflow-y:auto; padding-right:2px; }
+  .tpl{
+    display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px;
+    background:rgba(0,0,0,0.2); border:1px solid rgba(221,210,171,0.15); border-radius:6px;
+    cursor:pointer; font-size:10.5px; color:var(--parchment-dim); text-align:center; line-height:1.2;
+  }
+  .tpl:hover{ border-color:var(--brass); color:var(--parchment); background:rgba(176,141,87,0.1); }
+  .tpl .ic{ font-size:18px; }
+  .tpl .ic-img{ display:block; margin:0 auto; }
+  .tpl .sz{ font-size:9px; color:var(--parchment-dim); opacity:0.7; }
+  .btn-custom{
+    width:100%; font-family:'Spectral',serif; font-size:12.5px; padding:8px; border-radius:6px;
+    background:transparent; border:1px dashed var(--brass); color:var(--brass-light); cursor:pointer;
+  }
+  .btn-custom:hover{ background:rgba(176,141,87,0.12); }
+
+  .board{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .capacity-wrap{ width:100%; max-width:520px; }
+  .capacity-label{ display:flex; justify-content:space-between; font-size:12px; color:var(--parchment-dim); margin-bottom:4px; }
+  .strap{
+    position:relative; height:16px; border-radius:9px; background:var(--leather-dark);
+    border:1px solid var(--leather-edge); overflow:hidden;
+    box-shadow:inset 0 2px 3px rgba(0,0,0,0.5);
+  }
+  .strap-fill{ height:100%; border-radius:9px 0 0 9px; transition:width 0.25s ease, background 0.25s ease; }
+  .buckle{
+    position:absolute; top:50%; width:20px; height:20px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass) 70%);
+    border:1px solid #6b5027; transform:translate(-50%,-50%); transition:left 0.25s ease;
+    box-shadow:0 0 0 2px rgba(0,0,0,0.3);
+  }
+
+  .grid-shell{
+    padding:14px; border-radius:12px; position:relative;
+    background:
+      linear-gradient(180deg,var(--leather),var(--leather-dark));
+    border:1px solid var(--leather-edge);
+    box-shadow:0 8px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .rivet{ position:absolute; width:9px; height:9px; border-radius:50%; background:radial-gradient(circle at 35% 30%,var(--brass-light),var(--brass) 70%); box-shadow:0 1px 2px rgba(0,0,0,0.6); }
+  .rivet.tl{ top:6px; left:6px; } .rivet.tr{ top:6px; right:6px; }
+  .rivet.bl{ bottom:6px; left:6px; } .rivet.br{ bottom:6px; right:6px; }
+
+  #grid{
+    position:relative;
+    background-color:rgba(221,210,171,0.06);
+    background-image:
+      linear-gradient(to right, var(--stitch) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--stitch) 1px, transparent 1px);
+    background-size:var(--cell) var(--cell);
+    border-radius:5px;
+    border:1px dashed rgba(221,210,171,0.25);
+    touch-action:none;
+    user-select:none;
+  }
+  .item{
+    position:absolute; border-radius:6px; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; cursor:grab; color:#fff8ea; text-shadow:0 1px 1px rgba(0,0,0,0.5);
+    border:1px solid rgba(0,0,0,0.35); box-shadow:0 2px 5px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition:box-shadow 0.15s ease;
+    font-size:11px; line-height:1.15; padding:2px; text-align:center; overflow:hidden;
+  }
+  .item.selected{ box-shadow:0 0 0 2px var(--brass-light), 0 2px 6px rgba(0,0,0,0.4); z-index:5; }
+  .item.invalid{ box-shadow:0 0 0 2px var(--danger-light); }
+  .item.dragging{ cursor:grabbing; opacity:0.92; z-index:10; }
+  .item .ic{ font-size:16px; }
+  .item .nm{ font-size:9.5px; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .item-actions{ position:absolute; display:flex; gap:4px; z-index:20; }
+  .item-actions button{
+    width:22px; height:22px; border-radius:50%; border:1px solid var(--leather-edge);
+    background:var(--parchment); color:var(--leather-dark); font-size:12px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .item-actions button:hover{ background:var(--brass-light); }
+
+  .empty-state{ text-align:center; color:var(--parchment-dim); font-size:14px; padding:40px 20px; max-width:400px; }
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+    background:var(--leather-dark); border:1px solid var(--brass); color:var(--parchment);
+    padding:10px 18px; border-radius:8px; font-size:13px; opacity:0; pointer-events:none;
+    transition:all 0.25s ease; z-index:200; max-width:80vw; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:300; padding:16px;
+  }
+  .modal{
+    background:linear-gradient(180deg,#2c2117,#1c150d); border:1px solid var(--brass); border-radius:10px;
+    padding:20px; width:100%; max-width:340px; color:var(--parchment);
+  }
+  .modal h3{ margin:0 0 12px; color:var(--brass-light); font-size:16px; text-align:center; }
+  .field{ margin-bottom:10px; }
+  .field label{ display:block; font-size:12px; color:var(--parchment-dim); margin-bottom:4px; }
+  .field input, .field select{
+    width:100%; padding:7px 9px; border-radius:5px; border:1px solid var(--leather-edge);
+    background:rgba(0,0,0,0.25); color:var(--parchment); font-family:'Spectral',serif; font-size:13px;
+  }
+  .field-row{ display:flex; gap:8px; }
+  .field-row .field{ flex:1; }
+  .modal-actions{ display:flex; gap:8px; margin-top:14px; }
+  .modal-actions button{
+    flex:1; padding:9px; border-radius:6px; font-family:'Cinzel',serif; font-size:12.5px; cursor:pointer; border:1px solid var(--leather-edge);
+  }
+  .btn-primary{ background:linear-gradient(180deg,var(--brass-light),var(--brass)); color:#2c2117; border:1px solid #6b5027; }
+  .btn-secondary{ background:transparent; color:var(--parchment-dim); }
+  .hint{ font-size:11px; color:var(--parchment-dim); text-align:center; margin-top:4px; }
+  .mode-toggle{ display:flex; gap:6px; margin-bottom:12px; }
+  .mode-btn{
+    flex:1; padding:7px; border-radius:5px; font-family:'Cinzel',serif; font-size:11.5px; cursor:pointer;
+    background:transparent; border:1px solid var(--leather-edge); color:var(--parchment-dim);
+  }
+  .mode-btn.active{ background:rgba(176,141,87,0.15); border-color:var(--brass); color:var(--brass-light); }
+  .checkfield{ display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:12.5px; color:var(--parchment); }
+  .checkfield input{ width:16px; height:16px; }
+  .formula-box{
+    font-size:12px; color:var(--brass-light); text-align:center; background:rgba(176,141,87,0.1);
+    border:1px solid rgba(176,141,87,0.3); border-radius:6px; padding:8px; margin-bottom:10px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Sac d'aventurier</h1>
+    <p>Chaque objet occupe des cases sur la grille — glissez, faites pivoter, organisez.</p>
+    <div class="badge-shared">Partagé — tout le monde qui ouvre ce lien voit le même sac</div>
+  </header>
+
+  <div class="tabbar" id="tabbar"></div>
+
+  <div class="main" id="main" hidden>
+    <aside class="palette">
+      <h3>Objets courants</h3>
+      <div class="templates" id="templates"></div>
+      <button class="btn-custom" id="btnCustomItem">+ Objet personnalisé</button>
+    </aside>
+
+    <section class="board">
+      <div class="capacity-wrap">
+        <div class="capacity-label"><span id="capText">0 / 0 cases</span><span id="capPct">0%</span></div>
+        <div class="strap"><div class="strap-fill" id="strapFill"></div><div class="buckle" id="buckle"></div></div>
+      </div>
+      <div class="grid-shell">
+        <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+        <div id="grid"></div>
+      </div>
+      <div class="hint">Cliquez un objet pour le sélectionner (modifier / pivoter / supprimer). Glissez pour le déplacer.</div>
+    </section>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    Aucun aventurier pour l'instant.<br><br>
+    <button class="btn-custom" id="btnFirstChar" style="max-width:220px;margin:0 auto;">+ Ajouter un aventurier</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+const K_CHARS = 'dnd-inv:characters';
+const K_ITEMS = id => 'dnd-inv:items:' + id;
+
+const CATS = {
+  weapon:{label:'Arme', color:'var(--cat-weapon)'},
+  armor:{label:'Armure', color:'var(--cat-armor)'},
+  potion:{label:'Potion', color:'var(--cat-potion)'},
+  misc:{label:'Divers', color:'var(--cat-misc)'},
+  treasure:{label:'Trésor', color:'var(--cat-treasure)'},
+  container:{label:'Contenant', color:'var(--cat-container)'}
+};
+
+const TEMPLATES = [
+  {name:'Bourse', w:1,h:1, cat:'treasure', icon:'💰'},
+  {name:'Potion', w:1,h:2, cat:'potion', icon:'🧪'},
+  {name:'Anneau', w:1,h:1, cat:'treasure', icon:'💍'},
+  {name:'Collier', w:2,h:1, cat:'treasure', icon:'📿'},
+  {name:'Bracelet', w:2,h:1, cat:'treasure', icon:'🔗'},
+  {name:'Amulette', w:1,h:2, cat:'treasure', icon:'🧿'},
+  {name:'Bougies', w:1,h:1, cat:'misc', icon:'🕯️'},
+  {name:'Livre', w:2,h:2, cat:'misc', icon:'📖'},
+  {name:'Lettre / parchemin', w:2,h:1, cat:'misc', icon:'📜'},
+  {name:'Carte', w:1,h:4, cat:'misc', icon:'🗺️'},
+  {name:'Corde', w:2,h:2, cat:'misc', icon:'🪢'},
+  {name:'Petite boîte', w:2,h:1, cat:'container', icon:'📦'},
+  {name:'Moyenne boîte', w:2,h:2, cat:'container', icon:'🗃️'},
+  {name:'Grosse boîte', w:4,h:3, cat:'container', icon:'🧰'},
+  {name:'Coffre', w:4,h:5, cat:'container', icon:'🧳'},
+  {name:'Petite arme', w:1,h:2, cat:'weapon', icon:'🗡️'},
+  {name:'Arme à une main', w:1,h:3, cat:'weapon', icon:'⚔️'},
+  {name:'Arme à deux mains', w:2,h:3, cat:'weapon', icon:'🔨'},
+  {name:'Bâton / javelot', w:1,h:6, cat:'weapon', icon:'🔱'},
+  {name:'Arc / arbalète', w:2,h:3, cat:'weapon', icon:'🏹'},
+  {name:'Carquois', w:1,h:3, cat:'weapon', icon:'🎯'},
+  {name:'Instrument', w:2,h:3, cat:'misc', icon:'🎻'},
+  {name:'Bouclier', w:3,h:3, cat:'armor', icon:'🛡️'},
+  {name:'Sac de couchage', w:2,h:3, cat:'misc', icon:'🛏️'}
+];
+
+let characters = [];
+let currentCharId = null;
+let items = [];
+let selectedId = null;
+let dragState = null;
+let suppressPoll = false;
+let modalOpen = false;
+
+const el = id => document.getElementById(id);
+const uid = () => Math.random().toString(36).slice(2,10);
+
+function toast(msg){
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+async function storageGet(key){
+  try{
+    if(window.storage){
+      const r = await window.storage.get(key, true);
+      return r ? JSON.parse(r.value) : null;
+    } else {
+      const res = await fetch('/api/kv/' + encodeURIComponent(key));
+      if(res.status === 404) return null;
+      if(!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      return JSON.parse(data.value);
+    }
+  }catch(e){ return null; }
+}
+async function storageSet(key, value){
+  try{
+    if(window.storage){
+      await window.storage.set(key, JSON.stringify(value), true);
+    } else {
+      const res = await fetch('/api/kv/' + encodeURIComponent(key), {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({value: JSON.stringify(value)})
+      });
+      if(!res.ok) throw new Error('save failed');
+    }
+    return true;
+  }catch(e){ toast('Erreur de sauvegarde — réessayez'); return false; }
+}
+async function storageDelete(key){
+  try{
+    if(window.storage){ await window.storage.delete(key, true); }
+    else { await fetch('/api/kv/' + encodeURIComponent(key), {method:'DELETE'}); }
+  }catch(e){}
+}
+
+function cellPx(){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell')); }
+
+function fits(list, x, y, w, h, gw, gh, excludeId){
+  if(x<0||y<0||x+w>gw||y+h>gh) return false;
+  for(const it of list){
+    if(it.id===excludeId) continue;
+    if(x < it.x+it.w && x+w > it.x && y < it.y+it.h && y+h > it.y) return false;
+  }
+  return true;
+}
+function autoPlace(list, w, h, gw, gh){
+  for(let y=0;y<=gh-h;y++){
+    for(let x=0;x<=gw-w;x++){
+      if(fits(list, x, y, w, h, gw, gh, null)) return {x,y};
+    }
+  }
+  return null;
+}
+
+function isImagePath(icon){
+  if(!icon) return false;
+  const s = icon.trim();
+  if(/^(https?:\/\/|data:image)/i.test(s)) return true;
+  if(/\.(png|jpe?g|svg|webp|gif)(\?.*)?$/i.test(s)) return true;
+  if(s.includes('/')) return true;
+  return false;
+}
+function iconHTML(icon, size){
+  if(isImagePath(icon)){
+    return '<img class="ic-img" src="'+icon.trim().replace(/"/g,'&quot;')+'" alt="" style="width:'+size+'px;height:'+size+'px;object-fit:contain;">';
+  }
+  return '<span class="ic">'+(icon||'?')+'</span>';
+}
+function currentChar(){ return characters.find(c=>c.id===currentCharId); }
+
+async function init(){
+  characters = (await storageGet(K_CHARS)) || [];
+  renderTabs();
+  if(characters.length){
+    currentCharId = characters[0].id;
+    await loadCurrentItems();
+  }
+  renderMainVisibility();
+  renderTemplates();
+  startPolling();
+}
+
+function renderMainVisibility(){
+  const has = characters.length>0;
+  el('main').hidden = !has;
+  el('emptyState').hidden = has;
+}
+
+async function loadCurrentItems(){
+  items = (await storageGet(K_ITEMS(currentCharId))) || [];
+  selectedId = null;
+  renderGrid();
+  renderCapacity();
+}
+
+function renderTabs(){
+  const bar = el('tabbar');
+  bar.innerHTML = '';
+  characters.forEach(c=>{
+    const b = document.createElement('div');
+    b.className = 'tab' + (c.id===currentCharId ? ' active' : '');
+    b.innerHTML = c.name + '<span class="edit" data-id="'+c.id+'">✎</span><span class="close" data-id="'+c.id+'">✕</span>';
+    b.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('close') || e.target.classList.contains('edit')) return;
+      if(currentCharId !== c.id){ currentCharId = c.id; renderTabs(); loadCurrentItems(); }
+    });
+    b.querySelector('.edit').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openCharModal(c);
+    });
+    b.querySelector('.close').addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      if(!confirm('Supprimer '+c.name+' et son inventaire ?')) return;
+      await storageDelete(K_ITEMS(c.id));
+      characters = characters.filter(x=>x.id!==c.id);
+      await storageSet(K_CHARS, characters);
+      if(currentCharId===c.id){ currentCharId = characters[0] ? characters[0].id : null; }
+      renderTabs();
+      renderMainVisibility();
+      if(currentCharId) await loadCurrentItems();
+    });
+    bar.appendChild(b);
+  });
+  const add = document.createElement('button');
+  add.className = 'tab-add';
+  add.textContent = '+ Aventurier';
+  add.addEventListener('click', ()=>openCharModal());
+  bar.appendChild(add);
+}
+
+function renderTemplates(){
+  const wrap = el('templates');
+  wrap.innerHTML = '';
+  TEMPLATES.forEach(t=>{
+    const d = document.createElement('div');
+    d.className = 'tpl';
+    d.innerHTML = iconHTML(t.icon, 18)+'<span>'+t.name+'</span><span class="sz">'+t.w+'×'+t.h+'</span>';
+    d.addEventListener('click', ()=> placeTemplate(t));
+    wrap.appendChild(d);
+  });
+}
+
+async function placeTemplate(t){
+  if(!currentCharId){ toast("Ajoutez d'abord un aventurier"); return; }
+  const c = currentChar();
+  const pos = autoPlace(items, t.w, t.h, c.width, c.height);
+  if(!pos){ toast('Le sac est plein — pas de place pour '+t.name); return; }
+  items.push({id:uid(), name:t.name, w:t.w, h:t.h, x:pos.x, y:pos.y, cat:t.cat, icon:t.icon});
+  renderGrid(); renderCapacity();
+  await storageSet(K_ITEMS(currentCharId), items);
+}
+
+function renderCapacity(){
+  const c = currentChar();
+  if(!c) return;
+  const total = c.width * c.height;
+  const used = items.reduce((s,it)=>s+it.w*it.h,0);
+  const pct = total ? Math.min(100, Math.round(used/total*100)) : 0;
+  el('capText').textContent = used + ' / ' + total + ' cases';
+  el('capPct').textContent = pct + '%';
+  let color = 'var(--ok)';
+  if(pct>=90) color = 'var(--danger)';
+  else if(pct>=60) color = 'var(--brass)';
+  el('strapFill').style.width = pct + '%';
+  el('strapFill').style.background = color;
+  el('buckle').style.left = pct + '%';
+}
+
+function renderGrid(){
+  const c = currentChar();
+  if(!c) return;
+  const grid = el('grid');
+  const cell = cellPx();
+  grid.style.width = (c.width*cell) + 'px';
+  grid.style.height = (c.height*cell) + 'px';
+  grid.innerHTML = '';
+  items.forEach(it => grid.appendChild(renderItem(it, cell, c)));
+  const acts = document.querySelectorAll('.item-actions');
+  acts.forEach(a=>a.remove());
+  if(selectedId) renderActions();
+}
+
+function renderItem(it, cell, c){
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 4;
+  const d = document.createElement('div');
+  d.className = 'item' + (it.id===selectedId ? ' selected' : '');
+  d.style.left = (it.x*cell + gap/2) + 'px';
+  d.style.top = (it.y*cell + gap/2) + 'px';
+  d.style.width = (it.w*cell - gap) + 'px';
+  d.style.height = (it.h*cell - gap) + 'px';
+  d.style.background = CATS[it.cat] ? CATS[it.cat].color : 'var(--cat-misc)';
+  d.dataset.id = it.id;
+  d.innerHTML = iconHTML(it.icon||it.name[0], 20) + (it.w>1||it.h>1 ? '<span class="nm">'+it.name+'</span>' : '');
+  attachDrag(d, it, c);
+  return d;
+}
+
+function attachDrag(node, it, c){
+  node.addEventListener('pointerdown', (e)=>{
+    e.preventDefault();
+    node.setPointerCapture(e.pointerId);
+    const cell = cellPx();
+    dragState = {
+      id: it.id, startClientX: e.clientX, startClientY: e.clientY,
+      origX: it.x, origY: it.y, w: it.w, h: it.h, cell, moved:false, gw:c.width, gh:c.height
+    };
+    node.classList.add('dragging');
+  });
+  node.addEventListener('pointermove', (e)=>{
+    if(!dragState || dragState.id!==it.id) return;
+    const dx = e.clientX - dragState.startClientX;
+    const dy = e.clientY - dragState.startClientY;
+    if(Math.abs(dx)>4 || Math.abs(dy)>4) dragState.moved = true;
+    const cell = dragState.cell;
+    const dcx = Math.round(dx/cell);
+    const dcy = Math.round(dy/cell);
+    let nx = Math.max(0, Math.min(dragState.gw - dragState.w, dragState.origX + dcx));
+    let ny = Math.max(0, Math.min(dragState.gh - dragState.h, dragState.origY + dcy));
+    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 4;
+    node.style.left = (nx*cell + gap/2) + 'px';
+    node.style.top = (ny*cell + gap/2) + 'px';
+    const ok = fits(items, nx, ny, dragState.w, dragState.h, dragState.gw, dragState.gh, it.id);
+    node.classList.toggle('invalid', !ok);
+    dragState.previewX = nx; dragState.previewY = ny; dragState.previewOk = ok;
+  });
+  node.addEventListener('pointerup', async (e)=>{
+    if(!dragState || dragState.id!==it.id) return;
+    node.classList.remove('dragging','invalid');
+    if(!dragState.moved){
+      selectedId = (selectedId===it.id) ? null : it.id;
+      dragState = null;
+      renderGrid();
+      return;
+    }
+    if(dragState.previewOk){
+      it.x = dragState.previewX; it.y = dragState.previewY;
+      await storageSet(K_ITEMS(currentCharId), items);
+    }
+    dragState = null;
+    renderGrid();
+    renderCapacity();
+  });
+}
+
+function renderActions(){
+  const it = items.find(i=>i.id===selectedId);
+  if(!it){ selectedId=null; return; }
+  const c = currentChar();
+  const cell = cellPx();
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 4;
+  const wrap = document.createElement('div');
+  wrap.className = 'item-actions';
+  wrap.style.left = (it.x*cell + it.w*cell - 68) + 'px';
+  wrap.style.top = (it.y*cell - 10) + 'px';
+  const edit = document.createElement('button');
+  edit.innerHTML = '✎'; edit.title='Modifier';
+  edit.addEventListener('click', ()=> openEditItemModal(it));
+  const rot = document.createElement('button');
+  rot.innerHTML = '⟳'; rot.title='Pivoter';
+  rot.addEventListener('click', async ()=>{
+    const nw = it.h, nh = it.w;
+    if(fits(items, it.x, it.y, nw, nh, c.width, c.height, it.id)){
+      it.w = nw; it.h = nh;
+      await storageSet(K_ITEMS(currentCharId), items);
+      renderGrid(); renderCapacity();
+    } else {
+      toast('Impossible de pivoter ici');
+    }
+  });
+  const del = document.createElement('button');
+  del.innerHTML = '✕'; del.title='Supprimer';
+  del.addEventListener('click', async ()=>{
+    items = items.filter(i=>i.id!==it.id);
+    selectedId = null;
+    await storageSet(K_ITEMS(currentCharId), items);
+    renderGrid(); renderCapacity();
+  });
+  wrap.appendChild(edit); wrap.appendChild(rot); wrap.appendChild(del);
+  el('grid').appendChild(wrap);
+}
+
+function openModal(html, onMount){
+  modalOpen = true;
+  const root = el('modalRoot');
+  root.innerHTML = '<div class="modal-bg"><div class="modal">'+html+'</div></div>';
+  root.querySelector('.modal-bg').addEventListener('click', (e)=>{ if(e.target.classList.contains('modal-bg')) closeModal(); });
+  onMount(root);
+}
+function closeModal(){ modalOpen = false; el('modalRoot').innerHTML=''; }
+
+const AUTO_BASE_COLS = 5;
+const AUTO_BASE_ROWS = 7;
+function calcAutoRows(force, backpack, large){
+  let rows = AUTO_BASE_ROWS + (force - 10) + (backpack ? 2 : 0) + (large ? 2 : 0);
+  return Math.max(1, Math.min(24, Math.round(rows)));
+}
+
+function openCharModal(existingChar){
+  const isEdit = !!existingChar;
+  const startMode = (isEdit && !existingChar.calc) ? 'manual' : 'auto';
+  const force = isEdit && existingChar.calc ? existingChar.calc.force : 10;
+  const backpack = isEdit && existingChar.calc ? existingChar.calc.backpack : false;
+  const large = isEdit && existingChar.calc ? existingChar.calc.large : false;
+  const manW = isEdit ? existingChar.width : AUTO_BASE_COLS;
+  const manH = isEdit ? existingChar.height : AUTO_BASE_ROWS;
+
+  openModal(
+    '<h3>'+(isEdit ? 'Modifier '+existingChar.name : 'Nouvel aventurier')+'</h3>'+
+    '<div class="field"><label>Nom</label><input id="mName" placeholder="Ex. Elandra" value="'+(isEdit?existingChar.name:'')+'"></div>'+
+    '<div class="mode-toggle">'+
+      '<button type="button" class="mode-btn" id="modeAuto">Automatique</button>'+
+      '<button type="button" class="mode-btn" id="modeManual">Manuel</button>'+
+    '</div>'+
+    '<div id="autoSection">'+
+      '<div class="field"><label>Force</label><input id="mForce" type="number" min="1" max="30" value="'+force+'"></div>'+
+      '<div class="checkfield"><input type="checkbox" id="mBackpack" '+(backpack?'checked':'')+'><label for="mBackpack">Sac à dos (+2 lignes)</label></div>'+
+      '<div class="checkfield"><input type="checkbox" id="mLarge" '+(large?'checked':'')+'><label for="mLarge">Personnage de grande taille (+2 lignes)</label></div>'+
+      '<div class="formula-box" id="autoFormula"></div>'+
+    '</div>'+
+    '<div id="manualSection" style="display:none">'+
+      '<div class="field-row">'+
+        '<div class="field"><label>Colonnes</label><input id="mW" type="number" min="1" max="20" value="'+manW+'"></div>'+
+        '<div class="field"><label>Lignes</label><input id="mH" type="number" min="1" max="24" value="'+manH+'"></div>'+
+      '</div>'+
+      '<div class="hint" id="mTotal"></div>'+
+    '</div>'+
+    '<div class="modal-actions"><button class="btn-secondary" id="mCancel">Annuler</button><button class="btn-primary" id="mOk">'+(isEdit?'Enregistrer':'Créer')+'</button></div>',
+    (root)=>{
+      let mode = startMode;
+      const autoBtn = root.querySelector('#modeAuto'), manualBtn = root.querySelector('#modeManual');
+      const autoSec = root.querySelector('#autoSection'), manSec = root.querySelector('#manualSection');
+      const forceI = root.querySelector('#mForce'), bpI = root.querySelector('#mBackpack'), lgI = root.querySelector('#mLarge');
+      const formulaBox = root.querySelector('#autoFormula');
+      const wI = root.querySelector('#mW'), hI = root.querySelector('#mH'), tot = root.querySelector('#mTotal');
+
+      function setMode(m){
+        mode = m;
+        autoBtn.classList.toggle('active', m==='auto');
+        manualBtn.classList.toggle('active', m==='manual');
+        autoSec.style.display = m==='auto' ? 'block' : 'none';
+        manSec.style.display = m==='manual' ? 'block' : 'none';
+        updateAuto(); updateManual();
+      }
+      function updateAuto(){
+        const f = +forceI.value || 10;
+        const rows = calcAutoRows(f, bpI.checked, lgI.checked);
+        formulaBox.textContent = AUTO_BASE_COLS+' colonnes × '+rows+' lignes = '+(AUTO_BASE_COLS*rows)+' cases';
+      }
+      function updateManual(){
+        tot.textContent = ((+wI.value||0)*(+hI.value||0)) + ' cases au total';
+      }
+      autoBtn.addEventListener('click', ()=>setMode('auto'));
+      manualBtn.addEventListener('click', ()=>setMode('manual'));
+      forceI.addEventListener('input', updateAuto);
+      bpI.addEventListener('change', updateAuto);
+      lgI.addEventListener('change', updateAuto);
+      wI.addEventListener('input', updateManual);
+      hI.addEventListener('input', updateManual);
+      setMode(mode);
+
+      root.querySelector('#mCancel').addEventListener('click', closeModal);
+      root.querySelector('#mOk').addEventListener('click', async ()=>{
+        const name = root.querySelector('#mName').value.trim() || 'Aventurier';
+        let width, height, calc;
+        if(mode==='auto'){
+          const f = Math.max(1, Math.min(30, +forceI.value||10));
+          const bp = bpI.checked, lg = lgI.checked;
+          width = AUTO_BASE_COLS;
+          height = calcAutoRows(f, bp, lg);
+          calc = {force:f, backpack:bp, large:lg};
+        } else {
+          width = Math.max(1, Math.min(20, +wI.value||7));
+          height = Math.max(1, Math.min(24, +hI.value||5));
+          calc = null;
+        }
+        if(isEdit){
+          const c = characters.find(x=>x.id===existingChar.id);
+          c.name = name; c.width = width; c.height = height; c.calc = calc;
+          await storageSet(K_CHARS, characters);
+          if(currentCharId === c.id){
+            const outOfBounds = items.filter(it => it.x+it.w>width || it.y+it.h>height);
+            if(outOfBounds.length){
+              toast(outOfBounds.length+' objet(s) dépassent désormais de la grille — déplacez-les ou supprimez-les.');
+            }
+            renderGrid(); renderCapacity();
+          }
+          closeModal();
+          renderTabs();
+        } else {
+          const c = {id:uid(), name, width, height, calc};
+          characters.push(c);
+          await storageSet(K_CHARS, characters);
+          currentCharId = c.id;
+          items = [];
+          await storageSet(K_ITEMS(c.id), items);
+          closeModal();
+          renderTabs();
+          renderMainVisibility();
+          renderGrid();
+          renderCapacity();
+        }
+      });
+    }
+  );
+}
+
+function openCustomItemModal(){
+  if(!currentCharId){ toast("Ajoutez d'abord un aventurier"); return; }
+  const catOptions = Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');
+  openModal(
+    '<h3>Objet personnalisé</h3>'+
+    '<div class="field"><label>Nom</label><input id="iName" placeholder="Ex. Filet de pêche"></div>'+
+    '<div class="field-row">'+
+      '<div class="field"><label>Largeur (cases)</label><input id="iW" type="number" min="1" max="6" value="1"></div>'+
+      '<div class="field"><label>Hauteur (cases)</label><input id="iH" type="number" min="1" max="6" value="1"></div>'+
+    '</div>'+
+    '<div class="field"><label>Catégorie</label><select id="iCat">'+catOptions+'</select></div>'+
+    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="iIcon" placeholder="🎣" maxlength="2"></div>'+
+    '<div class="modal-actions"><button class="btn-secondary" id="iCancel">Annuler</button><button class="btn-primary" id="iOk">Ajouter</button></div>',
+    (root)=>{
+      root.querySelector('#iCancel').addEventListener('click', closeModal);
+      root.querySelector('#iOk').addEventListener('click', async ()=>{
+        const name = root.querySelector('#iName').value.trim();
+        if(!name){ toast("Donnez un nom à l'objet"); return; }
+        const w = Math.max(1, Math.min(6, +root.querySelector('#iW').value||1));
+        const h = Math.max(1, Math.min(6, +root.querySelector('#iH').value||1));
+        const cat = root.querySelector('#iCat').value;
+        const icon = root.querySelector('#iIcon').value.trim() || name[0].toUpperCase();
+        const c = currentChar();
+        const pos = autoPlace(items, w, h, c.width, c.height);
+        if(!pos){ toast('Le sac est plein — pas de place pour cet objet'); return; }
+        items.push({id:uid(), name, w, h, x:pos.x, y:pos.y, cat, icon});
+        await storageSet(K_ITEMS(currentCharId), items);
+        closeModal();
+        renderGrid(); renderCapacity();
+      });
+    }
+  );
+}
+
+function openEditItemModal(it){
+  const catOptions = Object.entries(CATS).map(([k,v])=>'<option value="'+k+'" '+(k===it.cat?'selected':'')+'>'+v.label+'</option>').join('');
+  openModal(
+    '<h3>Modifier l\u2019objet</h3>'+
+    '<div class="field"><label>Nom</label><input id="eName" value="'+it.name.replace(/"/g,'&quot;')+'"></div>'+
+    '<div class="field-row">'+
+      '<div class="field"><label>Largeur (cases)</label><input id="eW" type="number" min="1" max="6" value="'+it.w+'"></div>'+
+      '<div class="field"><label>Hauteur (cases)</label><input id="eH" type="number" min="1" max="6" value="'+it.h+'"></div>'+
+    '</div>'+
+    '<div class="field"><label>Catégorie</label><select id="eCat">'+catOptions+'</select></div>'+
+    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+(it.icon||'')+'" maxlength="2"></div>'+
+    '<div class="modal-actions"><button class="btn-secondary" id="eCancel">Annuler</button><button class="btn-primary" id="eOk">Enregistrer</button></div>',
+    (root)=>{
+      root.querySelector('#eCancel').addEventListener('click', closeModal);
+      root.querySelector('#eOk').addEventListener('click', async ()=>{
+        const name = root.querySelector('#eName').value.trim();
+        if(!name){ toast("Donnez un nom à l'objet"); return; }
+        const newW = Math.max(1, Math.min(6, +root.querySelector('#eW').value||1));
+        const newH = Math.max(1, Math.min(6, +root.querySelector('#eH').value||1));
+        const cat = root.querySelector('#eCat').value;
+        const icon = root.querySelector('#eIcon').value.trim() || name[0].toUpperCase();
+        const c = currentChar();
+        const target = items.find(i=>i.id===it.id);
+        target.name = name; target.cat = cat; target.icon = icon;
+        if(newW !== target.w || newH !== target.h){
+          if(fits(items, target.x, target.y, newW, newH, c.width, c.height, target.id)){
+            target.w = newW; target.h = newH;
+          } else {
+            const pos = autoPlace(items.filter(i=>i.id!==target.id), newW, newH, c.width, c.height);
+            if(pos){
+              target.w = newW; target.h = newH; target.x = pos.x; target.y = pos.y;
+              toast('Objet redéplacé automatiquement — plus de place à son ancien emplacement.');
+            } else {
+              toast('Taille inchangée : aucune place disponible pour '+newW+'×'+newH+'.');
+            }
+          }
+        }
+        await storageSet(K_ITEMS(currentCharId), items);
+        closeModal();
+        renderGrid(); renderCapacity();
+      });
+    }
+  );
+}
+
+el('btnFirstChar').addEventListener('click', ()=>openCharModal());
+el('btnCustomItem').addEventListener('click', openCustomItemModal);
+
+function startPolling(){
+  setInterval(async ()=>{
+    if(modalOpen || dragState) return;
+    const remoteChars = await storageGet(K_CHARS);
+    if(remoteChars && JSON.stringify(remoteChars) !== JSON.stringify(characters)){
+      const hadCurrent = currentCharId;
+      characters = remoteChars;
+      if(!characters.find(c=>c.id===currentCharId)){
+        currentCharId = characters[0] ? characters[0].id : null;
+      }
+      renderTabs();
+      renderMainVisibility();
+      if(currentCharId && currentCharId !== hadCurrent){ await loadCurrentItems(); }
+    }
+    if(currentCharId){
+      const remoteItems = await storageGet(K_ITEMS(currentCharId));
+      if(remoteItems && JSON.stringify(remoteItems) !== JSON.stringify(items)){
+        items = remoteItems;
+        selectedId = null;
+        renderGrid();
+        renderCapacity();
+      }
+    }
+  }, 3000);
+}
+
+init();
+</script>
+</body>
+</html>

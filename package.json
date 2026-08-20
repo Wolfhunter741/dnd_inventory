@@ -1,0 +1,13 @@
+{
+  "name": "inventaire-dnd-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend minimal pour l'outil d'inventaire spatial D&D (sert la page + une API clé-valeur persistée sur disque).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
