@@ -749,7 +749,7 @@ function openCustomItemModal(){
       '<div class="field"><label>Hauteur (cases)</label><input id="iH" type="number" min="1" max="6" value="1"></div>'+
     '</div>'+
     '<div class="field"><label>Catégorie</label><select id="iCat">'+catOptions+'</select></div>'+
-    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="iIcon" placeholder="🎣" maxlength="2"></div>'+
+    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="iIcon" placeholder="🎣" maxlength="50"></div>'+
     '<div class="modal-actions"><button class="btn-secondary" id="iCancel">Annuler</button><button class="btn-primary" id="iOk">Ajouter</button></div>',
     (root)=>{
       root.querySelector('#iCancel').addEventListener('click', closeModal);
@@ -782,7 +782,7 @@ function openEditItemModal(it){
       '<div class="field"><label>Hauteur (cases)</label><input id="eH" type="number" min="1" max="6" value="'+it.h+'"></div>'+
     '</div>'+
     '<div class="field"><label>Catégorie</label><select id="eCat">'+catOptions+'</select></div>'+
-    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+(it.icon||'')+'" maxlength="2"></div>'+
+    '<div class="field"><label>Icône (emoji, optionnel)</label><input id="eIcon" value="'+(it.icon||'')+'" maxlength="50"></div>'+
     '<div class="modal-actions"><button class="btn-secondary" id="eCancel">Annuler</button><button class="btn-primary" id="eOk">Enregistrer</button></div>',
     (root)=>{
       root.querySelector('#eCancel').addEventListener('click', closeModal);
