@@ -53,7 +53,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'sha256-2bA5OemQGUZkFOOezsYxCKLHWTQUgB/mjGcpCQd1d30='"],
       imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: ["'self'"],
       objectSrc: ["'none'"],
