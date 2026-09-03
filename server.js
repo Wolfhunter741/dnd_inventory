@@ -59,6 +59,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       baseUri: ["'none'"],
       frameAncestors: ["'none'"],
+      upgradeInsecureRequests: null
     },
   },
 }));
